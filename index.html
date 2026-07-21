@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>
+Ocean Guardian | AI Smart Ocean Cleaning System
+</title>
+
+
+<link rel="stylesheet" href="style.css">
+
+
+<!-- Leaflet Map CSS -->
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+</head>
+
+
+
+<body>
+
+
+
+<!-- ================= HEADER ================= -->
+
+
+<header class="header">
+
+
+<div class="logo">
+🌊 Ocean Guardian
+</div>
+
+
+
+<div class="subtitle">
+AI Smart Ocean Cleaning System
+</div>
+
+
+
+<div class="system-status">
+
+<span class="online">
+● SYSTEM ONLINE
+</span>
+
+
+<span id="clock">
+00:00:00
+</span>
+
+
+</div>
+
+
+
+</header>
+
+
+
+
+
+
+
+<!-- ================= DASHBOARD ================= -->
+
+
+<div class="dashboard">
+
+
+
+
+
+
+<!-- ================= SIDEBAR ================= -->
+
+
+<aside class="sidebar">
+
+
+<h2>
+CONTROL PANEL
+</h2>
+
+
+
+<ul>
+
+
+<li>
+🌍 Ocean Monitor
+</li>
+
+
+<li>
+🤖 AI Detection
+</li>
+
+
+<li>
+📊 Analytics
+</li>
+
+
+<li>
+🛰 GPS Tracking
+</li>
+
+
+<li>
+🚀 Mission Control
+</li>
+
+
+<li>
+🔔 Alerts
+</li>
+
+
+</ul>
+
+
+
+
+
+
+
+<div class="robot-card">
+
+
+<h3>
+🤖 Robot Status
+</h3>
+
+
+
+<p>
+Model:
+
+<strong>
+OG-01 Guardian
+</strong>
+
+</p>
+
+
+
+
+<p>
+Status:
+
+<span id="robotStatus">
+Cleaning
+</span>
+
+</p>
+
+
+
+<p>
+Battery:
+
+<span id="battery">
+87%
+</span>
+
+</p>
+
+
+
+<p>
+Solar:
+
+<strong>
+Active ☀
+</strong>
+
+</p>
+
+
+
+</div>
+
+
+</aside>
+
+
+
+
+
+
+
+
+
+<!-- ================= MAIN ================= -->
+
+
+<main class="main-content">
+
+
+
+
+
+
+
+
+<!-- ================= HERO ================= -->
+
+
+<section class="hero">
+
+
+
+<h1>
+AI Ocean Cleaning Mission
+</h1>
+
+
+
+
+<p>
+
+Autonomous solar-powered robot using Artificial Intelligence
+to detect and remove ocean plastic waste.
+
+</p>
+
+
+
+
+
+
+
+<div class="mission-box">
+
+
+
+
+
+<div class="stat-card">
+
+
+<h3>
+🗑 Plastic Collected
+</h3>
+
+
+<h1 id="plasticCounter">
+2450 KG
+</h1>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="stat-card">
+
+
+<h3>
+🌊 Ocean Area Scanned
+</h3>
+
+
+<h1>
+12.5 KM²
+</h1>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="stat-card">
+
+
+<h3>
+🐢 Marine Safety
+</h3>
+
+
+<h1>
+92%
+</h1>
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= OCEAN MONITOR ================= -->
+
+
+<section class="panel">
+
+
+
+<h2>
+🌊 Ocean Monitoring Center
+</h2>
+
+
+
+
+
+
+<div class="ocean-grid">
+
+
+
+
+
+
+<!-- REAL LEAFLET MAP -->
+
+
+<div class="ocean-map">
+
+
+<h3>
+🗺 Live Ocean Map
+</h3>
+
+
+
+<div id="oceanMap">
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- WATER STATUS -->
+
+
+<div class="water-status">
+
+
+
+<h3>
+💧 Water Quality
+</h3>
+
+
+
+<p>
+Temperature:
+
+<strong>
+26°C
+</strong>
+
+</p>
+
+
+
+<p>
+pH Level:
+
+<strong>
+8.1
+</strong>
+
+</p>
+
+
+
+<p>
+Plastic Density:
+
+<strong>
+Low
+</strong>
+
+</p>
+
+
+
+<p>
+Marine Life:
+
+<strong>
+Safe
+</strong>
+
+</p>
+
+
+
+<p>
+Ocean Condition:
+
+<strong>
+Healthy
+</strong>
+
+</p>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- ================= AI CAMERA ================= -->
+
+
+<section class="panel">
+
+
+
+<h2>
+🤖 AI Plastic Detection Camera
+</h2>
+
+
+
+
+
+<div class="camera-container">
+
+
+
+
+
+<div class="camera-screen">
+
+
+
+
+
+<div class="camera-header">
+
+📷 LIVE AI CAMERA FEED
+
+</div>
+
+
+
+
+
+
+<div class="camera-view">
+
+
+
+<img id="uploadedImage"
+src=""
+alt="AI Camera Preview">
+
+
+
+<div class="scan-line"></div>
+
+
+
+
+<div id="aiResult">
+
+Waiting for image...
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<input 
+type="file"
+id="imageUpload"
+accept="image/*">
+
+
+
+
+
+<button onclick="scanImage()">
+
+🤖 Scan With AI
+
+</button>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="ai-info">
+
+
+<h3>
+AI Analysis
+</h3>
+
+
+
+<p>
+Object:
+<strong>
+Unknown
+</strong>
+</p>
+
+
+
+<p>
+Method:
+<strong>
+Computer Vision AI
+</strong>
+</p>
+
+
+
+<p>
+Protection:
+<strong>
+Enabled 🐢
+</strong>
+</p>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+
+</section>
+<!-- ================= ANALYTICS DASHBOARD ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+📊 Ocean Analytics Dashboard
+</h2>
+
+
+
+
+<div class="analytics-grid">
+
+
+
+
+
+<div class="chart-card">
+
+
+<h3>
+Plastic Collection
+</h3>
+
+
+
+<canvas id="plasticChart"></canvas>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="chart-card">
+
+
+<h3>
+Waste Categories
+</h3>
+
+
+
+<canvas id="wasteChart"></canvas>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="chart-card">
+
+
+<h3>
+Ocean Health Index
+</h3>
+
+
+
+<canvas id="oceanHealthChart"></canvas>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= GPS TRACKING ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🛰 GPS Robot Tracking
+</h2>
+
+
+
+
+<div class="gps-panel">
+
+
+
+
+
+<div class="gps-map">
+
+
+
+<h3>
+Robot Location
+</h3>
+
+
+
+<p>
+
+📍 Latitude:
+25.2048°
+
+</p>
+
+
+
+<p>
+
+📍 Longitude:
+55.2708°
+
+</p>
+
+
+
+<p>
+
+Mission Zone:
+Ocean Sector A
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="gps-data">
+
+
+<h3>
+Satellite Data
+</h3>
+
+
+
+<p>
+
+Movement:
+
+<strong>
+Scanning Area
+</strong>
+
+</p>
+
+
+
+<p>
+
+Speed:
+
+<strong>
+4.5 km/h
+</strong>
+
+</p>
+
+
+
+<p>
+
+Signal:
+
+<strong>
+Excellent
+</strong>
+
+</p>
+
+
+
+<p>
+
+Connection:
+
+<strong>
+Satellite Online
+</strong>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= WEATHER MONITORING ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🌤 Ocean Weather Monitoring
+</h2>
+
+
+
+
+<div class="weather-grid">
+
+
+
+
+
+<div class="weather-card">
+
+
+<h3>
+Temperature
+</h3>
+
+
+<h1>
+28°C
+</h1>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="weather-card">
+
+
+<h3>
+Wind Speed
+</h3>
+
+
+<h1>
+12 km/h
+</h1>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="weather-card">
+
+
+<h3>
+Wave Height
+</h3>
+
+
+<h1>
+1.2 m
+</h1>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="weather-card">
+
+
+<h3>
+Solar Energy
+</h3>
+
+
+<h1>
+94%
+</h1>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= SOLAR POWER ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+☀ Solar Power System
+</h2>
+
+
+
+
+<div class="solar-system">
+
+
+
+
+
+<div class="solar-panel">
+
+
+
+<h3>
+Solar Panels
+</h3>
+
+
+
+<h1>
+☀ ACTIVE
+</h1>
+
+
+
+<p>
+
+Renewable energy charging enabled
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="battery-box">
+
+
+
+<h3>
+Battery Status
+</h3>
+
+
+
+<h1 id="batteryDisplay">
+87%
+</h1>
+
+
+
+
+
+<div class="battery-bar">
+
+
+<div class="battery-fill">
+
+87%
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= 3D ROBOT VIEWER ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🤖 Ocean Guardian 3D Robot Viewer
+</h2>
+
+
+
+
+
+
+<div class="robot-viewer">
+
+
+
+
+
+<div class="robot-model">
+
+
+
+<div class="robot-head">
+
+🔵
+
+</div>
+
+
+
+<div class="robot-body">
+
+🤖
+
+</div>
+
+
+
+<div class="robot-base">
+
+⚙️
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="robot-information">
+
+
+<h3>
+OG-01 Guardian Robot
+</h3>
+
+
+
+
+<p>
+
+AI System:
+<strong>
+Online
+</strong>
+
+</p>
+
+
+
+<p>
+
+Energy:
+<strong>
+Solar Powered
+</strong>
+
+</p>
+
+
+
+<p>
+
+Purpose:
+<strong>
+Ocean Cleaning
+</strong>
+
+</p>
+
+
+
+<p>
+
+AI Model:
+<strong>
+Waste Detection AI
+</strong>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+</section>
+
+
+
+
+
+
+<!-- ================= MISSION CONTROL ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🚀 Mission Control Center
+</h2>
+
+
+
+
+
+<div class="mission-control">
+
+
+
+
+
+<div class="control-card">
+
+
+<h3>
+🤖 Robot Commands
+</h3>
+
+
+
+
+<button onclick="startMission()">
+
+▶ Start Cleaning Mission
+
+</button>
+
+
+
+
+
+<button onclick="pauseMission()">
+
+⏸ Pause Robot
+
+</button>
+
+
+
+
+
+<button onclick="returnRobot()">
+
+🏠 Return To Base
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="control-card">
+
+
+<h3>
+📡 System Information
+</h3>
+
+
+
+<p>
+
+Robot:
+
+<strong>
+OG-01 Guardian
+</strong>
+
+</p>
+
+
+
+<p>
+
+AI:
+
+<strong>
+Active
+</strong>
+
+</p>
+
+
+
+<p>
+
+Communication:
+
+<strong>
+Satellite Connected
+</strong>
+
+</p>
+
+
+
+<p>
+
+Mission:
+
+<strong>
+Ocean Cleanup Alpha
+</strong>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="control-card">
+
+
+<h3>
+🌱 Environmental Goal
+</h3>
+
+
+
+<p>
+
+Target:
+
+<strong>
+5000 KG Plastic Removal
+</strong>
+
+</p>
+
+
+
+<p>
+
+Completed:
+
+<strong>
+2450 KG
+</strong>
+
+</p>
+
+
+
+<p>
+
+Progress:
+
+<strong>
+49%
+</strong>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= AI DECISION SYSTEM ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🧠 AI Decision System
+</h2>
+
+
+
+
+<div class="ai-grid">
+
+
+
+
+
+<div class="ai-card">
+
+
+<h3>
+Object Recognition
+</h3>
+
+
+
+<p>
+
+Plastic Detection:
+
+<span>
+ACTIVE
+</span>
+
+</p>
+
+
+
+<p>
+
+Animal Protection:
+
+<span>
+ON
+</span>
+
+</p>
+
+
+
+<p>
+
+Decision:
+
+<span>
+Collect Waste
+</span>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="ai-card">
+
+
+<h3>
+Safety System
+</h3>
+
+
+
+<p>
+Collision Avoidance:
+✅ Enabled
+</p>
+
+
+
+<p>
+Emergency Stop:
+✅ Ready
+</p>
+
+
+
+<p>
+Marine Protection:
+✅ Enabled
+</p>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= ALERT SYSTEM ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🔔 System Alerts
+</h2>
+
+
+
+
+<div class="alerts">
+
+
+
+<div class="alert success">
+
+✅ Plastic waste collected successfully
+
+</div>
+
+
+
+<div class="alert warning">
+
+⚠ Pollution hotspot detected
+
+</div>
+
+
+
+<div class="alert info">
+
+📡 Data uploaded to ocean database
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= MARINE PROTECTION ================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🐢 Marine Life Protection System
+</h2>
+
+
+
+
+<div class="marine-grid">
+
+
+
+
+
+<div class="marine-card">
+
+
+<h3>
+Animals Protected
+</h3>
+
+
+<h1>
+250+
+</h1>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="marine-card">
+
+
+<h3>
+Safe Distance
+</h3>
+
+
+<h1>
+20m
+</h1>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="marine-card">
+
+
+<h3>
+AI Animal Detection
+</h3>
+
+
+<h1>
+ACTIVE
+</h1>
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= FINAL MESSAGE ================= -->
+
+
+<section class="final-message">
+
+
+<h1>
+🌊 Protect Oceans With Technology
+</h1>
+
+
+
+<p>
+
+Ocean Guardian combines Artificial Intelligence,
+Robotics and Renewable Energy to create cleaner
+oceans and protect marine ecosystems.
+
+</p>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+</main>
+
+
+
+
+
+
+
+
+<!-- ================= FOOTER ================= -->
+
+
+<footer class="footer">
+
+
+<p>
+
+© 2026 Ocean Guardian |
+AI Smart Ocean Cleaning System
+
+</p>
+
+
+</footer>
+
+
+
+
+
+
+
+
+
+<!-- Chart.js Library -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+
+<!-- Leaflet Map Library -->
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
+
+
+<!-- Your JavaScript -->
+
+<script src="script.js"></script>
+
+
+
+
+
+</body>
+
+
+</html>
