@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /activityRecords/{recordId} {
+      // Prototype rules: only signed-in users (including anonymous Firebase users)
+      // can read records or create scan/cleanup records.
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['type', 'title', 'details', 'createdAt'])
+        && request.resource.data.type in ['scan', 'cleanup']
+        && request.resource.data.title is string
+        && request.resource.data.details is string;
+      allow update, delete: if false;
+    }
+  }
+}
