@@ -1424,3 +1424,423 @@ document.addEventListener(
 
 /* Start Firebase after the dashboard markup is available. */
 document.addEventListener("DOMContentLoaded", initializeOceanFirebase);
+
+/* ==========================================
+   OCEAN GUARDIAN - TEACHABLE MACHINE AI
+   ========================================== */
+
+(function () {
+    const MODEL_URL =
+        "https://teachablemachine.withgoogle.com/models/RE9nX3Ia4/";
+
+    let oceanAIModel = null;
+    let oceanCameraStream = null;
+    let oceanLiveActive = false;
+    let oceanPredictionBusy = false;
+    let oceanUploadedObjectURL = null;
+    const oceanLastSaved = {};
+
+    function element(id) {
+        return document.getElementById(id);
+    }
+
+    function setAIStatus(message) {
+        const status = element("aiStatus");
+        if (status) status.textContent = message;
+    }
+
+    function setAIResult(message) {
+        const result = element("aiResult");
+        if (result) result.textContent = message;
+    }
+
+    function setAIAnalysis(objectName, confidence) {
+        const object = element("detectedObject");
+        const score = element("aiConfidence");
+
+        if (object) object.textContent = objectName;
+        if (score) score.textContent = confidence;
+    }
+
+    // Load the trained Teachable Machine model.
+    async function loadOceanAI() {
+        if (oceanAIModel) return oceanAIModel;
+
+        if (!window.tmImage) {
+            throw new Error(
+                "AI library not loaded. Check the script tags in index.html."
+            );
+        }
+
+        setAIStatus("Loading AI model...");
+
+        oceanAIModel = await window.tmImage.load(
+            MODEL_URL + "model.json",
+            MODEL_URL + "metadata.json"
+        );
+
+        setAIStatus("AI Model Ready");
+        setAIResult("AI model loaded. Start the camera or upload an image.");
+
+        return oceanAIModel;
+    }
+
+    // Convert the trained model's class label into a decision.
+    function getWasteDecision(label) {
+        const name = label.toLowerCase().trim();
+
+        // Check non-waste classes first.
+        if (
+            /no waste|not waste|background|nothing detected|other|empty scene/.test(name)
+        ) {
+            return {
+                category: label,
+                decision: "IGNORE — No waste"
+            };
+        }
+
+        // Ignore living things.
+        if (
+            /living thing|living object|animal|person|people|human|marine life|wildlife/.test(name) ||
+            /\b(dog|cat|bird|fish|turtle|horse|cow|sheep|bear|elephant|zebra|giraffe)\b/.test(name)
+        ) {
+            return {
+                category: label,
+                decision: "IGNORE — Living thing"
+            };
+        }
+
+        // Recognize the waste categories used in your project.
+        if (/bottle/.test(name)) {
+            return {
+                category: "Plastic Bottle",
+                decision: "WASTE DETECTED"
+            };
+        }
+
+        if (/food container|takeaway container|container/.test(name)) {
+            return {
+                category: "Food Container",
+                decision: "WASTE DETECTED"
+            };
+        }
+
+        if (/plastic bag|shopping bag|bag/.test(name)) {
+            return {
+                category: "Plastic Bag",
+                decision: "WASTE DETECTED"
+            };
+        }
+
+        if (/paper|cardboard/.test(name)) {
+            return {
+                category: "Paper Waste",
+                decision: "WASTE DETECTED"
+            };
+        }
+
+        if (/plastic|wrapper|packaging|litter|trash|waste/.test(name)) {
+            return {
+                category: "Plastic Waste",
+                decision: "WASTE DETECTED"
+            };
+        }
+
+        return {
+            category: label,
+            decision: "IGNORE — Other or unrecognized class"
+        };
+    }
+
+    // Save real predictions, with a cooldown to prevent duplicate records.
+    async function saveOceanPrediction(
+        category,
+        confidence,
+        decision,
+        source
+    ) {
+        const now = Date.now();
+        const key = decision + ":" + category;
+
+        // Save each category/decision at most once every 15 seconds.
+        if (oceanLastSaved[key] && now - oceanLastSaved[key] < 15000) {
+            return;
+        }
+
+        if (typeof window.saveActivity !== "function") {
+            console.warn(
+                "Prediction detected, but the existing Firebase saveActivity() function was not found."
+            );
+            return;
+        }
+
+        oceanLastSaved[key] = now;
+
+        try {
+            await window.saveActivity({
+                title: "AI camera prediction",
+                type: "scan",
+                detectedObject: category,
+                confidence: Math.round(confidence * 100),
+                details:
+                    "Decision: " + decision +
+                    " | Confidence: " + Math.round(confidence * 100) + "%" +
+                    " | Source: " + source,
+                imageName: source
+            });
+        } catch (error) {
+            console.error("Could not save AI prediction:", error);
+            setAIStatus("AI running — database save failed");
+        }
+    }
+
+    // Run the trained model on an image or a video frame.
+    async function predictOceanImage(source, sourceName) {
+        const model = await loadOceanAI();
+        const predictions = await model.predict(source);
+
+        if (!predictions || predictions.length === 0) {
+            setAIResult("No prediction returned.");
+            return;
+        }
+
+        let best = predictions[0];
+
+        for (const prediction of predictions) {
+            if (prediction.probability > best.probability) {
+                best = prediction;
+            }
+        }
+
+        const confidence = best.probability;
+        const label = best.className;
+
+        // Avoid making a confident claim from a weak prediction.
+        if (confidence < 0.65) {
+            setAIAnalysis("Uncertain", Math.round(confidence * 100) + "%");
+            setAIResult("Uncertain result — please try another image.");
+            setAIStatus("Low confidence");
+            return;
+        }
+
+        const result = getWasteDecision(label);
+
+        setAIAnalysis(
+            result.category,
+            Math.round(confidence * 100) + "%"
+        );
+
+        setAIResult(
+            result.decision + ": " + result.category +
+            " (" + Math.round(confidence * 100) + "%)"
+        );
+
+        setAIStatus("Prediction complete");
+
+        // Save detections and ignored classes to Firebase.
+        await saveOceanPrediction(
+            result.category,
+            confidence,
+            result.decision,
+            sourceName
+        );
+    }
+
+    // Start the laptop camera.
+    window.startLiveCamera = async function () {
+        try {
+            if (!navigator.mediaDevices ||
+                !navigator.mediaDevices.getUserMedia) {
+                throw new Error(
+                    "Camera access requires HTTPS or localhost in a supported browser."
+                );
+            }
+
+            await loadOceanAI();
+
+            if (oceanCameraStream) return;
+
+            setAIStatus("Requesting camera permission...");
+
+            oceanCameraStream =
+                await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "user"
+                    },
+                    audio: false
+                });
+
+            const video = element("liveCamera");
+            const image = element("uploadedImage");
+
+            if (!video) {
+                throw new Error(
+                    "The liveCamera video element is missing from index.html."
+                );
+            }
+
+            video.srcObject = oceanCameraStream;
+            video.style.display = "block";
+
+            if (image) image.style.display = "none";
+
+            await video.play();
+
+            oceanLiveActive = true;
+            setAIStatus("Live camera running");
+            setAIResult("Analyzing camera frames...");
+            runOceanLiveLoop();
+
+        } catch (error) {
+            console.error("Camera/model error:", error);
+            setAIStatus("Camera or AI error");
+            setAIResult(error.message || "Could not start the camera.");
+
+            if (oceanCameraStream) {
+                oceanCameraStream.getTracks().forEach(track => track.stop());
+                oceanCameraStream = null;
+            }
+        }
+    };
+
+    // Analyze frames repeatedly while the camera is running.
+    async function runOceanLiveLoop() {
+        if (!oceanLiveActive) return;
+
+        const video = element("liveCamera");
+
+        if (
+            video &&
+            video.readyState >= 2 &&
+            !oceanPredictionBusy
+        ) {
+            oceanPredictionBusy = true;
+
+            try {
+                await predictOceanImage(video, "Live laptop camera");
+            } catch (error) {
+                console.error("Live prediction error:", error);
+                setAIStatus("Prediction error");
+            } finally {
+                oceanPredictionBusy = false;
+            }
+        }
+
+        if (oceanLiveActive) {
+            window.setTimeout(runOceanLiveLoop, 700);
+        }
+    }
+
+    // Stop the camera and release it.
+    window.stopLiveCamera = function () {
+        oceanLiveActive = false;
+
+        if (oceanCameraStream) {
+            oceanCameraStream.getTracks().forEach(track => track.stop());
+            oceanCameraStream = null;
+        }
+
+        const video = element("liveCamera");
+        const image = element("uploadedImage");
+
+        if (video) {
+            video.pause();
+            video.srcObject = null;
+            video.style.display = "none";
+        }
+
+        if (image) {
+            image.style.display = image.src ? "block" : "none";
+        }
+
+        setAIStatus("Camera stopped");
+        setAIResult("Camera stopped. Start it again or upload an image.");
+    };
+
+    // Use the AI model when the existing Scan With AI button is clicked.
+    window.scanImage = async function () {
+        try {
+            await loadOceanAI();
+
+            const video = element("liveCamera");
+            const image = element("uploadedImage");
+
+            if (
+                oceanLiveActive &&
+                video &&
+                video.readyState >= 2
+            ) {
+                await predictOceanImage(video, "Manual live scan");
+                return;
+            }
+
+            if (!image || !image.src || !image.complete ||
+                image.naturalWidth === 0) {
+                setAIResult("Please upload an image first.");
+                setAIStatus("Waiting for image");
+                return;
+            }
+
+            setAIStatus("Analyzing uploaded image...");
+            await predictOceanImage(image, "Uploaded image");
+
+        } catch (error) {
+            console.error("Image scan failed:", error);
+            setAIStatus("AI scan failed");
+            setAIResult(
+                "Could not scan the image. Check the model URL and internet connection."
+            );
+        }
+    };
+
+    // Connect the existing file input to the image preview.
+    const uploadInput = element("imageUpload");
+
+    if (uploadInput) {
+        uploadInput.addEventListener("change", function (event) {
+            const file = event.target.files && event.target.files[0];
+
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                setAIResult("Please select an image file.");
+                return;
+            }
+
+            const image = element("uploadedImage");
+            const video = element("liveCamera");
+
+            if (oceanUploadedObjectURL) {
+                URL.revokeObjectURL(oceanUploadedObjectURL);
+            }
+
+            oceanUploadedObjectURL = URL.createObjectURL(file);
+
+            if (image) {
+                image.src = oceanUploadedObjectURL;
+                image.style.display = "block";
+            }
+
+            // Upload scanning uses the image rather than the live camera.
+            if (oceanLiveActive) {
+                window.stopLiveCamera();
+                if (image) image.style.display = "block";
+            }
+
+            if (video) video.style.display = "none";
+
+            setAIStatus("Image ready to scan");
+            setAIResult("Image loaded. Click Scan With AI.");
+        });
+    }
+
+    // Load the model when the page opens.
+    loadOceanAI().catch(error => {
+        console.error("Could not load Teachable Machine model:", error);
+        setAIStatus("Model failed to load");
+        setAIResult(
+            "Check the model URL, model sharing, and internet connection."
+        );
+    });
+})();
+
